@@ -11,13 +11,13 @@ import android.app.NotificationManager
 import java.util.*
 import android.app.PendingIntent
 import com.learn.MainActivity
-import com.vikramezhil.droidspeech.DroidSpeech
-import com.vikramezhil.droidspeech.OnDSListener
 import androidx.core.app.NotificationCompat
 import android.os.Build
 import com.learn.BottomNavigationActivity
 import com.learn.constants.KEYWORD_TWO
 import android.app.NotificationChannel
+import com.vikramezhil.droidspeech.DroidSpeech
+import com.vikramezhil.droidspeech.OnDSListener
 import com.learn.R
 
 
@@ -50,7 +50,7 @@ class VoiceService : Service(), OnDSListener {
         if(finalSpeechResult?.equals(KEYWORD_TWO) == true){
 
             val i = Intent()
-            i.setClass(this, BottomNavigationActivity::class.java)
+            i.setClass(this, MainActivity::class.java)
             i.flags = Intent.FLAG_ACTIVITY_NEW_TASK
             startActivity(i)
 

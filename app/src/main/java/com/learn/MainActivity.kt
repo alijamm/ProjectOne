@@ -9,14 +9,6 @@ import android.widget.Toast
 import com.learn.service.VoiceService
 import com.vikramezhil.droidspeech.DroidSpeech
 import com.vikramezhil.droidspeech.OnDSListener
-import com.vikramezhil.droidspeech.OnDSPermissionsListener
-import androidx.core.app.ComponentActivity
-import androidx.core.app.ComponentActivity.ExtraData
-import androidx.core.content.ContextCompat.getSystemService
-import android.icu.lang.UCharacter.GraphemeClusterBreak.T
-
-
-
 
 class MainActivity : AppCompatActivity(), OnDSListener {
 
