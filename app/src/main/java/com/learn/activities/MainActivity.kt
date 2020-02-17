@@ -1,4 +1,4 @@
-package com.learn
+package com.learn.activities
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -6,6 +6,8 @@ import kotlinx.android.synthetic.main.activity_main.*
 import android.content.Intent
 import android.os.Build
 import android.widget.Toast
+import androidx.lifecycle.ViewModel
+import com.learn.R
 import com.learn.service.VoiceService
 import com.vikramezhil.droidspeech.DroidSpeech
 import com.vikramezhil.droidspeech.OnDSListener
@@ -73,7 +75,6 @@ class MainActivity : AppCompatActivity(), OnDSListener {
     ) {
         if(supportedSpeechLanguages?.contains("en-EN") == true)
         {
-            // Setting the droid speech preferred language as french if found
             droidSpeech?.setPreferredLanguage("en-En")
         }
     }

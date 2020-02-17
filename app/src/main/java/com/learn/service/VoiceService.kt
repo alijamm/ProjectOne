@@ -1,6 +1,5 @@
 package com.learn.service
 
-import android.app.Notification
 import android.app.Service
 import android.content.Context
 import android.content.Intent
@@ -10,15 +9,13 @@ import android.os.Handler
 import android.app.NotificationManager
 import java.util.*
 import android.app.PendingIntent
-import com.learn.MainActivity
+import com.learn.activities.MainActivity
 import androidx.core.app.NotificationCompat
 import android.os.Build
-import com.learn.BottomNavigationActivity
 import com.learn.constants.KEYWORD_TWO
 import android.app.NotificationChannel
 import com.vikramezhil.droidspeech.DroidSpeech
 import com.vikramezhil.droidspeech.OnDSListener
-import com.learn.R
 
 
 class VoiceService : Service(), OnDSListener {
@@ -27,14 +24,14 @@ class VoiceService : Service(), OnDSListener {
         currentSpeechLanguage: String?,
         supportedSpeechLanguages: MutableList<String>?
     ) {
-        if(supportedSpeechLanguages?.contains("en-EN") == true)
+        if(supportedSpeechLanguages?.contains("en-CA") == true)
         {
-            // Setting the droid speech preferred language as french if found
-            droidSpeech?.setPreferredLanguage("en-En")
+            droidSpeech?.setPreferredLanguage("en-CA")
         }
     }
 
     override fun onDroidSpeechError(errorMsg: String?) {
+
     }
 
     override fun onDroidSpeechClosedByUser() {
@@ -138,6 +135,11 @@ class VoiceService : Service(), OnDSListener {
     }
 
     private fun createPersistentNotificationO(intent: Intent){
+        val contentTitle = "My Service"
+
+        val contentText = "You have a running service !"
+        // Action to stop the service.
+        val stopAction = NotificationCompat.Action.Builder(android.R.drawable.stat_notify_sync,contentTitle, PendingIntent.getService(context,1,intent,PendingIntent.FLAG_UPDATE_CURRENT)).build()
         val input = intent.getStringExtra("inputExtra")
         createNotificationChannel()
         val notificationIntent = Intent(this, MainActivity::class.java)
@@ -150,6 +152,7 @@ class VoiceService : Service(), OnDSListener {
             .setContentText(input)
             .setSmallIcon(android.R.drawable.arrow_up_float)
             .setContentIntent(pendingIntent)
+            .addAction(stopAction)
             .build()
 
         startForeground(1, notification)
