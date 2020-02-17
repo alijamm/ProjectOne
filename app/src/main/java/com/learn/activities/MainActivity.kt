@@ -1,4 +1,4 @@
-package com.learn
+package com.learn.activities
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -6,17 +6,11 @@ import kotlinx.android.synthetic.main.activity_main.*
 import android.content.Intent
 import android.os.Build
 import android.widget.Toast
+import androidx.lifecycle.ViewModel
+import com.learn.R
 import com.learn.service.VoiceService
 import com.vikramezhil.droidspeech.DroidSpeech
 import com.vikramezhil.droidspeech.OnDSListener
-import com.vikramezhil.droidspeech.OnDSPermissionsListener
-import androidx.core.app.ComponentActivity
-import androidx.core.app.ComponentActivity.ExtraData
-import androidx.core.content.ContextCompat.getSystemService
-import android.icu.lang.UCharacter.GraphemeClusterBreak.T
-
-
-
 
 class MainActivity : AppCompatActivity(), OnDSListener {
 
@@ -81,7 +75,6 @@ class MainActivity : AppCompatActivity(), OnDSListener {
     ) {
         if(supportedSpeechLanguages?.contains("en-EN") == true)
         {
-            // Setting the droid speech preferred language as french if found
             droidSpeech?.setPreferredLanguage("en-En")
         }
     }
