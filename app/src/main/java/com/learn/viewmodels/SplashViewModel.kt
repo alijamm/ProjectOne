@@ -1,4 +1,4 @@
-package com.learn.ui
+package com.learn.viewmodels
 
 import androidx.lifecycle.ViewModel
 

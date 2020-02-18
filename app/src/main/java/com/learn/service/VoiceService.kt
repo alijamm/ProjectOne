@@ -12,8 +12,9 @@ import android.app.PendingIntent
 import com.learn.activities.MainActivity
 import androidx.core.app.NotificationCompat
 import android.os.Build
-import com.learn.constants.KEYWORD_TWO
 import android.app.NotificationChannel
+import android.util.Log
+import com.learn.constants.*
 import com.vikramezhil.droidspeech.DroidSpeech
 import com.vikramezhil.droidspeech.OnDSListener
 
@@ -24,27 +25,36 @@ class VoiceService : Service(), OnDSListener {
         currentSpeechLanguage: String?,
         supportedSpeechLanguages: MutableList<String>?
     ) {
-        if(supportedSpeechLanguages?.contains("en-CA") == true)
+        if(supportedSpeechLanguages?.contains("en-US") == true)
         {
-            droidSpeech?.setPreferredLanguage("en-CA")
+            droidSpeech?.setPreferredLanguage("en-US")
         }
     }
 
     override fun onDroidSpeechError(errorMsg: String?) {
+        Log.d("Q","error speech $errorMsg")
 
     }
 
     override fun onDroidSpeechClosedByUser() {
+
+        Log.d("Q","closed by user speech")
+
     }
 
     override fun onDroidSpeechLiveResult(liveSpeechResult: String?) {
+
+        Log.d("Q","live speech $liveSpeechResult")
     }
 
     override fun onDroidSpeechFinalResult(finalSpeechResult: String?) {
 
 
 
-        if(finalSpeechResult?.equals(KEYWORD_TWO) == true){
+        if((finalSpeechResult?.equals(KEYWORD_TWO)) == true || finalSpeechResult?.equals(KEYWORD_THREE) == true || finalSpeechResult?.equals(
+                KEYWORD_FOUR) == true || finalSpeechResult?.equals(KEYWORD_FIVE) == true || finalSpeechResult?.equals(
+                KEYWORD_SIX) == true || finalSpeechResult?.equals(KEYWORD_SEVEN) == true||finalSpeechResult?.equals(
+                KEYWORD_EIGHT) == true ||finalSpeechResult?.equals(KEYWORD_NINE) == true ){
 
             val i = Intent()
             i.setClass(this, MainActivity::class.java)
@@ -52,8 +62,8 @@ class VoiceService : Service(), OnDSListener {
             startActivity(i)
 
         }else{
-
-            Toast.makeText(this, "output : $finalSpeechResult", Toast.LENGTH_LONG).show()
+            Log.d("Q","live speech $finalSpeechResult")
+//            Toast.makeText(this, "output : $finalSpeechResult", Toast.LENGTH_LONG).show()
         }
 
 
@@ -70,10 +80,7 @@ class VoiceService : Service(), OnDSListener {
     var runnable: Runnable? = null
 
 
-    private val UPDATE_INTERVAL = 60 * 1000
-    private val timer = Timer()
     private val NOTIFICATION_EX = 1
-    private var notificationManager: NotificationManager? = null
     private var droidSpeech: DroidSpeech? = null
 
 
@@ -83,8 +90,8 @@ class VoiceService : Service(), OnDSListener {
 
         handler = Handler()
         runnable = Runnable {
-            Toast.makeText(context, "Service is still running", Toast.LENGTH_LONG).show()
-            handler?.postDelayed(runnable, 10000)
+            Log.d("Q","service is running")
+            handler?.postDelayed(runnable, 20000)
         }
 
         handler?.post(runnable)
