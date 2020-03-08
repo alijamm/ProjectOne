@@ -1,73 +1,85 @@
 package com.learn.service
 
-import android.app.Service
+import android.app.*
 import android.content.Context
 import android.content.Intent
-import android.os.IBinder
-import android.widget.Toast
-import android.os.Handler
-import android.app.NotificationManager
-import java.util.*
-import android.app.PendingIntent
-import com.learn.activities.MainActivity
-import androidx.core.app.NotificationCompat
 import android.os.Build
-import android.app.NotificationChannel
+import android.os.Handler
+import android.os.IBinder
+import android.speech.tts.TextToSpeech
 import android.util.Log
-import com.learn.constants.*
+import android.widget.Toast
+import androidx.core.app.NotificationCompat
+import com.learn.activities.MainActivity
 import com.vikramezhil.droidspeech.DroidSpeech
 import com.vikramezhil.droidspeech.OnDSListener
+import java.util.*
 
 
 class VoiceService : Service(), OnDSListener {
+
+    val wordsList: MutableList<String>? = null
+    private var speaker : TextToSpeech? = null
 
     override fun onDroidSpeechSupportedLanguages(
         currentSpeechLanguage: String?,
         supportedSpeechLanguages: MutableList<String>?
     ) {
-        if(supportedSpeechLanguages?.contains("en-US") == true)
-        {
+        if (supportedSpeechLanguages?.contains("en-US") == true) {
             droidSpeech?.setPreferredLanguage("en-US")
         }
     }
 
     override fun onDroidSpeechError(errorMsg: String?) {
-        Log.d("Q","error speech $errorMsg")
+        Log.d("Q", "error speech $errorMsg")
 
     }
 
     override fun onDroidSpeechClosedByUser() {
 
-        Log.d("Q","closed by user speech")
+        Log.d("Q", "closed by user speech")
 
     }
 
     override fun onDroidSpeechLiveResult(liveSpeechResult: String?) {
 
-        Log.d("Q","live speech $liveSpeechResult")
+        Log.d("Q", "live speech $liveSpeechResult")
     }
 
     override fun onDroidSpeechFinalResult(finalSpeechResult: String?) {
-
-
-
-        if((finalSpeechResult?.equals(KEYWORD_TWO)) == true || finalSpeechResult?.equals(KEYWORD_THREE) == true || finalSpeechResult?.equals(
-                KEYWORD_FOUR) == true || finalSpeechResult?.equals(KEYWORD_FIVE) == true || finalSpeechResult?.equals(
-                KEYWORD_SIX) == true || finalSpeechResult?.equals(KEYWORD_SEVEN) == true||finalSpeechResult?.equals(
-                KEYWORD_EIGHT) == true ||finalSpeechResult?.equals(KEYWORD_NINE) == true ){
-
-            val i = Intent()
-            i.setClass(this, MainActivity::class.java)
-            i.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            startActivity(i)
-
-        }else{
-            Log.d("Q","live speech $finalSpeechResult")
-//            Toast.makeText(this, "output : $finalSpeechResult", Toast.LENGTH_LONG).show()
+        finalSpeechResult?.toLowerCase()
+        if (finalSpeechResult?.indexOf("hey") != -1 || finalSpeechResult?.indexOf("hello") != -1|| finalSpeechResult?.indexOf("ecu") != -1) {
+            if (finalSpeechResult?.indexOf("q") != -1 || finalSpeechResult?.indexOf("queue") != -1 || finalSpeechResult?.indexOf("cute") != -1) {
+                val i = Intent()
+                i.setClass(this, MainActivity::class.java)
+                i.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                startActivity(i)
+                return
+            }
         }
 
+        if (finalSpeechResult?.indexOf("location") != -1 || finalSpeechResult?.indexOf("nearest") != -1) {
 
+            Toast.makeText(this, "location", Toast.LENGTH_SHORT).show()
+            return
+        }
 
+        if (finalSpeechResult?.indexOf("what") != -1) {
+            if (finalSpeechResult?.indexOf("playing") != -1 || finalSpeechResult?.indexOf("radio") != -1) {
+                Toast.makeText(this, "radio now playing", Toast.LENGTH_SHORT).show()
+                return
+            }
+        }
+
+        if (finalSpeechResult?.indexOf("buy") != -1 || finalSpeechResult?.indexOf("purchase") != -1) {
+            Toast.makeText(this, "buy item", Toast.LENGTH_SHORT).show()
+            if(Build.VERSION.SDK_INT >= 21){
+                speaker?.speak("purchase successful", TextToSpeech.QUEUE_FLUSH, null,null)
+            }else{
+                speaker?.speak("purchase successful", TextToSpeech.QUEUE_FLUSH,null)
+            }
+            return
+        }
 
 
     }
@@ -87,10 +99,18 @@ class VoiceService : Service(), OnDSListener {
     override fun onCreate() {
         super.onCreate()
         Toast.makeText(this, "Service created!", Toast.LENGTH_LONG).show()
-
+        droidSpeech = DroidSpeech(this, null)
+        speaker = TextToSpeech(applicationContext,
+            TextToSpeech.OnInitListener { status ->
+                if (status != TextToSpeech.ERROR) {
+                    speaker?.language = Locale.US
+                }
+            })
+        droidSpeech?.setOnDroidSpeechListener(this)
+        droidSpeech?.startDroidSpeechRecognition()
         handler = Handler()
         runnable = Runnable {
-            Log.d("Q","service is running")
+            Log.d("Q", "service is running")
             handler?.postDelayed(runnable, 20000)
         }
 
@@ -102,20 +122,16 @@ class VoiceService : Service(), OnDSListener {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             intent?.let { createPersistentNotificationO(it) }
-        }else{
+        } else {
             intent?.let { createPersistentNotificationPreO(it) }
         }
-        droidSpeech = DroidSpeech(this, null)
-        droidSpeech?.setOnDroidSpeechListener(this)
-        droidSpeech?.startDroidSpeechRecognition()
-
         return START_STICKY
     }
 
 
-    private fun createPersistentNotificationPreO(intent: Intent){
+    private fun createPersistentNotificationPreO(intent: Intent) {
         val contentTitle = "My Service"
         val contentText = "You have a running service !"
 
@@ -124,14 +140,25 @@ class VoiceService : Service(), OnDSListener {
 //        val piStopService = getStopServicePI(context)
 
         // Action to stop the service.
-        val stopAction = NotificationCompat.Action.Builder(android.R.drawable.stat_notify_sync,contentTitle, PendingIntent.getService(context,1,intent,PendingIntent.FLAG_UPDATE_CURRENT)).build()
+        val stopAction = NotificationCompat.Action.Builder(
+            android.R.drawable.stat_notify_sync,
+            contentTitle,
+            PendingIntent.getService(context, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        ).build()
 
         // Create a notification.
         val mNotification = NotificationCompat.Builder(context)
             .setContentTitle(contentTitle)
             .setContentText(contentText)
             .setSmallIcon(android.R.drawable.arrow_up_float)
-            .setContentIntent(PendingIntent.getService(context,2,intent,PendingIntent.FLAG_UPDATE_CURRENT))
+            .setContentIntent(
+                PendingIntent.getService(
+                    context,
+                    2,
+                    intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT
+                )
+            )
             .addAction(stopAction)
             .setStyle(NotificationCompat.BigTextStyle())
             .build()
@@ -141,12 +168,16 @@ class VoiceService : Service(), OnDSListener {
         )
     }
 
-    private fun createPersistentNotificationO(intent: Intent){
+    private fun createPersistentNotificationO(intent: Intent) {
         val contentTitle = "My Service"
 
         val contentText = "You have a running service !"
         // Action to stop the service.
-        val stopAction = NotificationCompat.Action.Builder(android.R.drawable.stat_notify_sync,contentTitle, PendingIntent.getService(context,1,intent,PendingIntent.FLAG_UPDATE_CURRENT)).build()
+        val stopAction = NotificationCompat.Action.Builder(
+            android.R.drawable.stat_notify_sync,
+            contentTitle,
+            PendingIntent.getService(context, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        ).build()
         val input = intent.getStringExtra("inputExtra")
         createNotificationChannel()
         val notificationIntent = Intent(this, MainActivity::class.java)
@@ -165,6 +196,7 @@ class VoiceService : Service(), OnDSListener {
         startForeground(1, notification)
 
     }
+
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val serviceChannel = NotificationChannel(

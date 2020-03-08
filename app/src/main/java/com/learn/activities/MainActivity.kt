@@ -3,9 +3,10 @@ package com.learn.activities
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import com.learn.R
 import android.os.Bundle
 import android.os.Handler
+import android.speech.tts.TextToSpeech
+import android.speech.tts.TextToSpeech.OnInitListener
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
@@ -13,11 +14,13 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.chad.library.adapter.base.BaseQuickAdapter
 import com.chad.library.adapter.base.BaseViewHolder
 import com.google.gson.Gson
+import com.learn.R
 import com.learn.adapters.RecyclerViewMainAdapter
 import com.learn.constants.RadioType
 import com.learn.models.Radio
 import com.learn.service.VoiceService
 import kotlinx.android.synthetic.main.activity_main.*
+import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
@@ -27,6 +30,7 @@ class MainActivity : AppCompatActivity() {
     private val itemList: MutableList<Radio> = mutableListOf()
     private var brvahAdapter: RecyclerViewMainAdapter? = null
     private val LOADING_TIME: Long = 3000
+    private var speaker : TextToSpeech? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -46,6 +50,12 @@ class MainActivity : AppCompatActivity() {
 
         val prefs = getSharedPreferences("switch", Context.MODE_PRIVATE)
         flag = prefs.getBoolean("name", false)
+        speaker = TextToSpeech(this,
+            OnInitListener { status ->
+                if (status != TextToSpeech.ERROR) {
+                    speaker?.language = Locale.US
+                }
+            })
 
         switch_button?.isChecked = flag
 
@@ -54,12 +64,28 @@ class MainActivity : AppCompatActivity() {
             editor.putBoolean("name", isChecked)
             editor.apply()
 
-            if (isChecked)
+            if (isChecked) {
                 startMyService()
+                if(Build.VERSION.SDK_INT >= 21){
+                    speaker?.speak("q ready", TextToSpeech.QUEUE_FLUSH, null,null)
+                }else{
+                    speaker?.speak("q ready", TextToSpeech.QUEUE_FLUSH,null)
+                }
+            }
             else
                 stopMyService()
         }
     }
+
+
+    override fun onPause() {
+        super.onPause()
+        if (speaker != null) {
+            speaker?.stop()
+            speaker?.shutdown()
+        }
+    }
+    
 
     private fun openNowPlayingRadioActivity(radio: Radio) {
         val intent = Intent()
