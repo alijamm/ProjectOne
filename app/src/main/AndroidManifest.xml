@@ -28,6 +28,12 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".activities.NowPlayingActivity"
+            android:label="@string/title_now_playing_activity"
+            android:theme="@style/NowPlayingTheme"
+            android:screenOrientation="landscape"
+            />
+        <activity
             android:name=".activities.BottomNavigationActivity"
             android:label="@string/title_activity_bottom_navigation" />
         <activity android:name=".activities.MainActivity"

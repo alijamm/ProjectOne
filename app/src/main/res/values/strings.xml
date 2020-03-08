@@ -12,4 +12,5 @@
     <string name="title_location_permission">Location Permission</string>
     <string name="text_location_permission">The application wants to use your current location</string>
     <string name="ok">ok</string>
+    <string name="title_now_playing_activity">NowPlayingActivity</string>
 </resources>
