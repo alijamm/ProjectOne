@@ -1,9 +1,12 @@
 package com.learn.activities
 
+import android.Manifest
+import android.app.PendingIntent.getActivity
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -14,6 +17,8 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.GridLayoutManager
 import com.chad.library.adapter.base.BaseQuickAdapter
@@ -110,12 +115,7 @@ class MainActivity : AppCompatActivity() {
                 openNowPlayingRadioActivity(itemList[(Math.random() * ( 5 )).toInt()])
                 textToSpeech("now playing on radio")
             }
-            "buy"->{
-                textToSpeech("q is buying this item for you")
-            }
-            "call"->{
-                textToSpeech("q will call this number for you")
-            }
+
         }
     }
     private fun textToSpeech(s : String){
@@ -129,6 +129,13 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                 Array<String>(9){Manifest.permission.RECORD_AUDIO},
+                9);
+        }
+
         EventBus.getDefault().register(this)
     }
 

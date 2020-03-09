@@ -189,32 +189,31 @@ class VoiceService : Service(), OnDSListener {
         }
 
         if (finalSpeechResult?.indexOf("location") != -1 || finalSpeechResult?.indexOf("nearest") != -1) {
-            LocalBroadcastManager.getInstance(this).sendBroadcast(Intent(RECEIVE_JSON).putExtra("json",3))
-            Toast.makeText(this, "location", Toast.LENGTH_SHORT).show()
+            EventBus.getDefault().post( MessageEvent("location"))
             return
         }
 
         if (finalSpeechResult?.indexOf("what") != -1) {
             if (finalSpeechResult?.indexOf("playing") != -1 || finalSpeechResult?.indexOf("radio") != -1) {
-                Toast.makeText(this, "radio now playing", Toast.LENGTH_SHORT).show()
                 EventBus.getDefault().post( MessageEvent("play"));
                 return
             }
         }
 
         if (finalSpeechResult?.indexOf("buy") != -1 || finalSpeechResult?.indexOf("purchase") != -1) {
-            Toast.makeText(this, "buy item", Toast.LENGTH_SHORT).show()
             EventBus.getDefault().post( MessageEvent("buy"));
             return
         }
 
         if (finalSpeechResult?.indexOf("call") != -1 || finalSpeechResult?.indexOf("number") != -1) {
-            Toast.makeText(this, "calling", Toast.LENGTH_SHORT).show()
             EventBus.getDefault().post( MessageEvent("call"));
             return
         }
 
-
+        if(finalSpeechResult?.indexOf("yes")!=-1){
+            EventBus.getDefault().post( MessageEvent("yes"));
+            return
+        }
 
     }
 
