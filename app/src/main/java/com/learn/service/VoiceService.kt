@@ -1,6 +1,9 @@
 package com.learn.service
 
-import android.app.*
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.os.Build
@@ -10,87 +13,22 @@ import android.speech.tts.TextToSpeech
 import android.util.Log
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.google.gson.Gson
 import com.learn.activities.MainActivity
+import com.learn.constants.RECEIVE_JSON
+import com.learn.models.MessageEvent
 import com.vikramezhil.droidspeech.DroidSpeech
 import com.vikramezhil.droidspeech.OnDSListener
+import org.greenrobot.eventbus.EventBus
 import java.util.*
 
 
 class VoiceService : Service(), OnDSListener {
 
-    val wordsList: MutableList<String>? = null
-    private var speaker : TextToSpeech? = null
-
-    override fun onDroidSpeechSupportedLanguages(
-        currentSpeechLanguage: String?,
-        supportedSpeechLanguages: MutableList<String>?
-    ) {
-        if (supportedSpeechLanguages?.contains("en-US") == true) {
-            droidSpeech?.setPreferredLanguage("en-US")
-        }
-    }
-
-    override fun onDroidSpeechError(errorMsg: String?) {
-        Log.d("Q", "error speech $errorMsg")
-
-    }
-
-    override fun onDroidSpeechClosedByUser() {
-
-        Log.d("Q", "closed by user speech")
-
-    }
-
-    override fun onDroidSpeechLiveResult(liveSpeechResult: String?) {
-
-        Log.d("Q", "live speech $liveSpeechResult")
-    }
-
-    override fun onDroidSpeechFinalResult(finalSpeechResult: String?) {
-        finalSpeechResult?.toLowerCase()
-        if (finalSpeechResult?.indexOf("hey") != -1 || finalSpeechResult?.indexOf("hello") != -1|| finalSpeechResult?.indexOf("ecu") != -1) {
-            if (finalSpeechResult?.indexOf("q") != -1 || finalSpeechResult?.indexOf("queue") != -1 || finalSpeechResult?.indexOf("cute") != -1) {
-                val i = Intent()
-                i.setClass(this, MainActivity::class.java)
-                i.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                startActivity(i)
-                return
-            }
-        }
-
-        if (finalSpeechResult?.indexOf("location") != -1 || finalSpeechResult?.indexOf("nearest") != -1) {
-
-            Toast.makeText(this, "location", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        if (finalSpeechResult?.indexOf("what") != -1) {
-            if (finalSpeechResult?.indexOf("playing") != -1 || finalSpeechResult?.indexOf("radio") != -1) {
-                Toast.makeText(this, "radio now playing", Toast.LENGTH_SHORT).show()
-                return
-            }
-        }
-
-        if (finalSpeechResult?.indexOf("buy") != -1 || finalSpeechResult?.indexOf("purchase") != -1) {
-            Toast.makeText(this, "buy item", Toast.LENGTH_SHORT).show()
-            if(Build.VERSION.SDK_INT >= 21){
-                speaker?.speak("purchase successful", TextToSpeech.QUEUE_FLUSH, null,null)
-            }else{
-                speaker?.speak("purchase successful", TextToSpeech.QUEUE_FLUSH,null)
-            }
-            return
-        }
-
-
-    }
-
-    override fun onDroidSpeechRmsChanged(rmsChangedValue: Float) {
-    }
-
     var context: Context = this
     var handler: Handler? = null
     var runnable: Runnable? = null
-
 
     private val NOTIFICATION_EX = 1
     private var droidSpeech: DroidSpeech? = null
@@ -98,16 +36,8 @@ class VoiceService : Service(), OnDSListener {
 
     override fun onCreate() {
         super.onCreate()
-        Toast.makeText(this, "Service created!", Toast.LENGTH_LONG).show()
         droidSpeech = DroidSpeech(this, null)
-        speaker = TextToSpeech(applicationContext,
-            TextToSpeech.OnInitListener { status ->
-                if (status != TextToSpeech.ERROR) {
-                    speaker?.language = Locale.US
-                }
-            })
         droidSpeech?.setOnDroidSpeechListener(this)
-        droidSpeech?.startDroidSpeechRecognition()
         handler = Handler()
         runnable = Runnable {
             Log.d("Q", "service is running")
@@ -115,9 +45,13 @@ class VoiceService : Service(), OnDSListener {
         }
 
         handler?.post(runnable)
+        EventBus.getDefault().post( MessageEvent("alive"));
+        droidSpeech?.startDroidSpeechRecognition()
     }
 
     override fun onBind(intent: Intent?): IBinder? {
+
+
         return null
     }
 
@@ -129,7 +63,15 @@ class VoiceService : Service(), OnDSListener {
         }
         return START_STICKY
     }
+    override fun onDestroy() {
+        /* IF YOU WANT THIS SERVICE KILLED WITH THE APP THEN UNCOMMENT THE FOLLOWING LINE */
+        handler?.removeCallbacks(runnable)
+        droidSpeech?.closeDroidSpeechOperations()
+    }
 
+    override fun onStart(intent: Intent, startid: Int) {
+        Toast.makeText(this, "Service started by user.", Toast.LENGTH_LONG).show()
+    }
 
     private fun createPersistentNotificationPreO(intent: Intent) {
         val contentTitle = "My Service"
@@ -209,16 +151,74 @@ class VoiceService : Service(), OnDSListener {
         }
     }
 
-
-    override fun onDestroy() {
-        /* IF YOU WANT THIS SERVICE KILLED WITH THE APP THEN UNCOMMENT THE FOLLOWING LINE */
-        handler?.removeCallbacks(runnable)
-        droidSpeech?.closeDroidSpeechOperations()
-        Toast.makeText(this, "Service stopped", Toast.LENGTH_LONG).show()
+    override fun onDroidSpeechSupportedLanguages(
+        currentSpeechLanguage: String?,
+        supportedSpeechLanguages: MutableList<String>?
+    ) {
+        if (supportedSpeechLanguages?.contains("en-US") == true) {
+            droidSpeech?.setPreferredLanguage("en-US")
+        }
     }
 
-    override fun onStart(intent: Intent, startid: Int) {
-        Toast.makeText(this, "Service started by user.", Toast.LENGTH_LONG).show()
-        droidSpeech?.startDroidSpeechRecognition()
+    override fun onDroidSpeechError(errorMsg: String?) {
+        Log.d("Q", "error speech $errorMsg")
+
+    }
+
+    override fun onDroidSpeechClosedByUser() {
+
+        Log.d("Q", "closed by user speech")
+
+    }
+
+    override fun onDroidSpeechLiveResult(liveSpeechResult: String?) {
+
+        Log.d("Q", "live speech $liveSpeechResult")
+    }
+
+    override fun onDroidSpeechFinalResult(finalSpeechResult: String?) {
+        finalSpeechResult?.toLowerCase()
+        if (finalSpeechResult?.indexOf("hey") != -1 || finalSpeechResult?.indexOf("hello") != -1|| finalSpeechResult?.indexOf("ecu") != -1) {
+            if (finalSpeechResult?.indexOf("q") != -1 || finalSpeechResult?.indexOf("queue") != -1 || finalSpeechResult?.indexOf("cute") != -1) {
+                val i = Intent()
+                i.setClass(this, MainActivity::class.java)
+                i.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                startActivity(i)
+                return
+            }
+        }
+
+        if (finalSpeechResult?.indexOf("location") != -1 || finalSpeechResult?.indexOf("nearest") != -1) {
+            LocalBroadcastManager.getInstance(this).sendBroadcast(Intent(RECEIVE_JSON).putExtra("json",3))
+            Toast.makeText(this, "location", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if (finalSpeechResult?.indexOf("what") != -1) {
+            if (finalSpeechResult?.indexOf("playing") != -1 || finalSpeechResult?.indexOf("radio") != -1) {
+                Toast.makeText(this, "radio now playing", Toast.LENGTH_SHORT).show()
+                EventBus.getDefault().post( MessageEvent("play"));
+                return
+            }
+        }
+
+        if (finalSpeechResult?.indexOf("buy") != -1 || finalSpeechResult?.indexOf("purchase") != -1) {
+            Toast.makeText(this, "buy item", Toast.LENGTH_SHORT).show()
+            EventBus.getDefault().post( MessageEvent("buy"));
+            return
+        }
+
+        if (finalSpeechResult?.indexOf("call") != -1 || finalSpeechResult?.indexOf("number") != -1) {
+            Toast.makeText(this, "calling", Toast.LENGTH_SHORT).show()
+            EventBus.getDefault().post( MessageEvent("call"));
+            return
+        }
+
+
+
+    }
+
+
+    override fun onDroidSpeechRmsChanged(rmsChangedValue: Float) {
     }
 }
