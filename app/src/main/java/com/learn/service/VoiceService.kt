@@ -207,7 +207,7 @@ class VoiceService : Service(), OnDSListener {
             return
         }
 
-        if (finalSpeechResult?.indexOf("like") != -1 || finalSpeechResult?.indexOf("favourite") != -1) {
+        if (finalSpeechResult?.indexOf("like") != -1 || finalSpeechResult?.indexOf("favorites") != -1) {
             EventBus.getDefault().post( MessageEvent("like"));
             return
         }

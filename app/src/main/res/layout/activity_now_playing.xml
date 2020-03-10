@@ -107,63 +107,69 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
-
             android:id="@+id/camera"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
             android:layout_weight="1"
+            android:padding="6dp"
             android:src="@drawable/ic_camera"
-            android:tint="@android:color/white" />
+            />
 
         <ImageView
             android:id="@+id/about"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
             android:layout_weight="1"
+            android:padding="6dp"
             android:src="@drawable/ic_information"
-            android:tint="@android:color/white" />
+            />
 
         <ImageView
             android:id="@+id/like"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
             android:layout_weight="1"
+            android:padding="6dp"
             android:src="@drawable/ic_like"
 
-            android:tint="@android:color/white" />
+            />
 
         <ImageView
             android:id="@+id/maps"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
             android:layout_weight="1"
+            android:padding="6dp"
             android:src="@drawable/ic_location"
-            android:tint="@android:color/white" />
+            />
 
         <ImageView
             android:id="@+id/cart"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
             android:layout_weight="1"
+            android:padding="6dp"
 
             android:src="@drawable/ic_shopping_cart"
-            android:tint="@android:color/white" />
+            />
 
         <ImageView
             android:id="@+id/callphone"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
             android:layout_weight="1"
+            android:padding="6dp"
             android:src="@drawable/ic_smartphone"
-            android:tint="@android:color/white" />
+            />
 
         <ImageView
             android:id="@+id/world"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
+            android:padding="6dp"
             android:layout_weight="1"
             android:src="@drawable/ic_worldwide"
-            android:tint="@android:color/white" />
+            />
 
 
     </LinearLayout>

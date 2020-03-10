@@ -114,11 +114,11 @@ class NowPlayingActivity : AppCompatActivity(), View.OnClickListener {
         }
     }
     private fun startPurchaseAction(){
-        cart?.setBackgroundColor(Color.YELLOW)
+        cart?.setImageResource(R.drawable.ic_shopping_cart_bought)
         Toast.makeText(this, "item added to shopping cart", Toast.LENGTH_LONG).show()
     }
     private fun startMapAction() {
-        maps?.setBackgroundColor(Color.YELLOW)
+        maps?.setImageResource(R.drawable.ic_locationy)
         val uri: String =
             java.lang.String.format(Locale.ENGLISH, "geo:%f,%f", 48.864716f, 2.349014f)
         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
@@ -132,13 +132,15 @@ class NowPlayingActivity : AppCompatActivity(), View.OnClickListener {
         builder.setMessage("Do you want to call this station ?")
         builder.setPositiveButton("Yes") { dialog, which ->
             dialog?.dismiss()
-            callphone?.setBackgroundColor(Color.YELLOW)
+            callphone?.setImageResource(R.drawable.ic_smartphoney)
             Toast.makeText(this, "Calling...", Toast.LENGTH_LONG).show()
-            val i = Intent(Intent.ACTION_DIAL, null)
+            val toDial="tel:"+"14252053678";
+            val i = Intent(Intent.ACTION_DIAL, Uri.parse(toDial))
             startActivity(i)
         }
         builder.setNegativeButton("Cancel") { dialog, which ->
             dialog?.dismiss()
+            callphone?.setImageResource(R.drawable.ic_smartphone)
         }
 
         // create and show the alert dialog
@@ -174,7 +176,7 @@ class NowPlayingActivity : AppCompatActivity(), View.OnClickListener {
             }
 
             world -> {
-               // Toast.makeText(this, "World", Toast.LENGTH_SHORT).show()
+                world?.setImageResource(R.drawable.ic_worldwidey)
             }
 
             cart -> {
@@ -193,10 +195,11 @@ class NowPlayingActivity : AppCompatActivity(), View.OnClickListener {
 
     private fun startLikeAction(){
         Toast.makeText(this, "Added to favourites", Toast.LENGTH_SHORT).show()
-        like?.setBackgroundColor(Color.YELLOW)
+        like?.setImageResource(R.drawable.ic_likey)
     }
 
     private fun showAboutDialog(){
+        about?.setImageResource(R.drawable.ic_informationy)
         var builder = AlertDialog.Builder(this);
         builder.setTitle("Interactive Radio");
         // set the custom layout
@@ -217,14 +220,17 @@ class NowPlayingActivity : AppCompatActivity(), View.OnClickListener {
                 "-Song Details")
         builder.setPositiveButton("Okay") { dialog, which ->
             dialog?.dismiss()
+            about?.setImageResource(R.drawable.ic_information)
         }
         // create and show the alert dialog
         alertDialog = builder.create();
         alertDialog?.show();
-        alertDialog?.setCancelable(true);
+        alertDialog?.setCancelable(false);
     }
 
     private fun requestCameraPermisison(){
+        camera?.setImageResource(R.drawable.ic_cameray)
+
         ActivityCompat.requestPermissions(this,
              Array<String>(1){ Manifest.permission.CAMERA}, 1)
     }
