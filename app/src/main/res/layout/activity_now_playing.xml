@@ -12,7 +12,6 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_margin="16dp"
-        android:src="@drawable/ic_signal"
         android:tint="@android:color/white"
         app:layout_constraintBottom_toTopOf="@+id/guidelineHorizontal"
         app:layout_constraintEnd_toStartOf="@+id/songAdGuidline"
@@ -37,11 +36,63 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_margin="36dp"
+        android:src="@drawable/coca"
         app:layout_constraintBottom_toTopOf="@+id/guidelineHorizontal"
         app:layout_constraintEnd_toStartOf="@+id/linearLayout"
         app:layout_constraintStart_toEndOf="@+id/songAdGuidline"
-        android:src="@drawable/coca"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/talkPoll"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="36dp"
+        android:padding="16dp"
+        android:visibility="gone"
+        android:background="@color/transparent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/linearLayout"
+        app:layout_constraintStart_toEndOf="@+id/songAdGuidline"
+        android:orientation="vertical"
+        app:layout_constraintTop_toTopOf="parent" >
+
+        <TextView
+            android:id="@+id/question"
+            android:textColor="@android:color/white"
+            android:layout_width="match_parent"
+            android:layout_margin="8dp"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_height="wrap_content"/>
+
+        <TextView
+            android:id="@+id/answerone"
+            android:layout_width="match_parent"
+            android:textColor="@android:color/white"
+            android:layout_margin="8dp"
+            android:textSize="14sp"
+
+
+            android:layout_height="wrap_content"/>
+
+        <TextView
+            android:id="@+id/answertwo"
+            android:layout_margin="8dp"
+            android:textSize="14sp"
+            android:layout_width="match_parent"
+            android:textColor="@android:color/white"
+
+            android:layout_height="wrap_content"/>
+
+        <TextView
+            android:id="@+id/answerthree"
+            android:layout_margin="8dp"
+            android:textSize="14sp"
+            android:textColor="@android:color/white"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/linearLayout"
@@ -57,63 +108,62 @@
 
         <ImageView
 
+            android:id="@+id/camera"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:tint="@android:color/white"
-
-            android:src="@drawable/ic_camera" />
+            android:src="@drawable/ic_camera"
+            android:tint="@android:color/white" />
 
         <ImageView
+            android:id="@+id/about"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
-            android:tint="@android:color/white"
-
             android:layout_weight="1"
-
-            android:src="@drawable/ic_information" />
+            android:src="@drawable/ic_information"
+            android:tint="@android:color/white" />
 
         <ImageView
+            android:id="@+id/like"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
-            android:tint="@android:color/white"
-
             android:layout_weight="1"
+            android:src="@drawable/ic_like"
 
-            android:src="@drawable/ic_like" />
+            android:tint="@android:color/white" />
 
         <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:tint="@android:color/white"
             android:id="@+id/maps"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
             android:layout_weight="1"
-            android:src="@drawable/ic_location" />
+            android:src="@drawable/ic_location"
+            android:tint="@android:color/white" />
 
         <ImageView
             android:id="@+id/cart"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
-            android:tint="@android:color/white"
-
             android:layout_weight="1"
-            android:src="@drawable/ic_shopping_cart" />
+
+            android:src="@drawable/ic_shopping_cart"
+            android:tint="@android:color/white" />
 
         <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:tint="@android:color/white"
             android:id="@+id/callphone"
-            android:layout_weight="1"
-            android:src="@drawable/ic_smartphone" />
-
-        <ImageView
             android:layout_width="wrap_content"
             android:layout_height="0dp"
-            android:tint="@android:color/white"
-
             android:layout_weight="1"
-            android:src="@drawable/ic_worldwide" />
+            android:src="@drawable/ic_smartphone"
+            android:tint="@android:color/white" />
+
+        <ImageView
+            android:id="@+id/world"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:src="@drawable/ic_worldwide"
+            android:tint="@android:color/white" />
 
 
     </LinearLayout>

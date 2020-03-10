@@ -8,7 +8,7 @@ class Radio(
     var hasAds: Boolean = false,
     var adUrl: String? = null,
     var question: String? = null,
-    var answers: String? = null,
+    var answers: ArrayList<String>? = null,
     var frequency: Double? = 0.0,
     var songArtist: String? = null
 ) {

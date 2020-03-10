@@ -1,6 +1,8 @@
 package com.learn.activities
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
@@ -8,6 +10,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import com.google.gson.Gson
 import com.learn.R
 import com.learn.constants.RadioType
@@ -20,7 +23,7 @@ import org.greenrobot.eventbus.ThreadMode
 import java.util.*
 
 
-class NowPlayingActivity : AppCompatActivity() {
+class NowPlayingActivity : AppCompatActivity(), View.OnClickListener {
 
     private var radio: Radio? = null
     private var alertDialog: AlertDialog? = null
@@ -30,10 +33,23 @@ class NowPlayingActivity : AppCompatActivity() {
         setContentView(R.layout.activity_now_playing)
         val gson = Gson()
         radio = gson.fromJson<Radio>(intent.getStringExtra("radio"), Radio::class.java)
+        camera?.setOnClickListener(this)
+        like?.setOnClickListener(this)
+        world?.setOnClickListener(this)
+        callphone?.setOnClickListener(this)
+        cart?.setOnClickListener(this)
+        about?.setOnClickListener(this)
+        maps?.setOnClickListener(this)
+
+
 
         when (radio?.type?.type) {
 
             RadioType.FILTER_MUSIC -> {
+                imageView2?.setImageDrawable(getDrawable(R.drawable.ic_signal))
+                talkPoll?.visibility=View.GONE
+                adImage?.visibility = View.VISIBLE
+                textView2?.visibility = View.VISIBLE
                 textView2?.text = "${radio?.name} \n ${radio?.song} \n ${radio?.songArtist} "
                 nowPlayingContainer?.background = getDrawable(R.drawable.blueequalizervector)
             }
@@ -42,14 +58,23 @@ class NowPlayingActivity : AppCompatActivity() {
                 imageView2?.visibility = View.GONE
                 textView2?.text = "${radio?.name} \n ${radio?.song} \n ${radio?.songArtist} "
                 nowPlayingContainer?.background = getDrawable(R.drawable.audiad)
+                talkPoll?.visibility=View.GONE
+                textView2?.visibility = View.VISIBLE
                 adImage?.visibility = View.GONE
             }
 
             RadioType.FILTER_TALK -> {
+                adImage?.visibility = View.GONE
+                talkPoll?.visibility=View.VISIBLE
                 imageView2?.background = getDrawable(R.drawable.radiodj)
                 textView2?.visibility = View.GONE
                 nowPlayingContainer?.background = getDrawable(R.drawable.giletsjaunes)
                 adImage?.visibility = View.GONE
+
+                question?.text = radio?.question
+                answerone?.text = radio?.answers?.get(0)
+                answertwo?.text = radio?.answers?.get(1)
+                answerthree?.text = radio?.answers?.get(2)
             }
         }
     }
@@ -58,51 +83,68 @@ class NowPlayingActivity : AppCompatActivity() {
     fun onMessageEvent(event: MessageEvent?) {
         when (event?.message) {
             "buy" -> {
-                cart?.setBackgroundColor(Color.YELLOW)
-                Toast.makeText(this,"item added to shopping cart",Toast.LENGTH_LONG).show()
+                startPurchaseAction()
             }
 
             "call" -> {
-                var builder = AlertDialog.Builder(this);
-                builder.setTitle("Turn on Radio");
-                // set the custom layout
-                builder.setMessage("Do you want to call this station ?")
-                builder.setPositiveButton("Yes") { dialog, which ->
-                    dialog?.dismiss()
-                    callphone?.setBackgroundColor(Color.YELLOW)
-                    Toast.makeText(this,"Calling...",Toast.LENGTH_LONG).show()
-                    val i = Intent(Intent.ACTION_DIAL, null)
-                    startActivity(i)
-                }
-                builder.setNegativeButton("Cancel") { dialog, which ->
-                    dialog?.dismiss()
-                }
-
-                // create and show the alert dialog
-                alertDialog = builder.create();
-                alertDialog?.show();
-                alertDialog?.setCancelable(false);
+                startPhoneAction()
 
             }
 
-            "yes"->{
-                if(alertDialog!=null){
+            "yes" -> {
+                if (alertDialog != null) {
                     callphone?.setBackgroundColor(Color.YELLOW)
-                    Toast.makeText(this,"Calling...",Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, "Calling...", Toast.LENGTH_LONG).show()
                     val i = Intent(Intent.ACTION_DIAL, null)
                     alertDialog = null
                     startActivity(i)
                 }
             }
 
-            "location"->{
-                maps?.setBackgroundColor(Color.YELLOW)
-                val uri: String = java.lang.String.format(Locale.ENGLISH, "geo:%f,%f", 48.864716f, 2.349014f)
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
-                Toast.makeText(this,"Redirecting...",Toast.LENGTH_LONG).show()
-                this.startActivity(intent)
+            "location" -> {
+                startMapAction()
+            }
+
+            "like"->{
+                startLikeAction()
+            }
+            "about"->{
+                showAboutDialog()
             }
         }
+    }
+    private fun startPurchaseAction(){
+        cart?.setBackgroundColor(Color.YELLOW)
+        Toast.makeText(this, "item added to shopping cart", Toast.LENGTH_LONG).show()
+    }
+    private fun startMapAction() {
+        maps?.setBackgroundColor(Color.YELLOW)
+        val uri: String =
+            java.lang.String.format(Locale.ENGLISH, "geo:%f,%f", 48.864716f, 2.349014f)
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
+        Toast.makeText(this, "Redirecting...", Toast.LENGTH_LONG).show()
+        this.startActivity(intent)
+    }
+    private fun startPhoneAction(){
+        var builder = AlertDialog.Builder(this);
+        builder.setTitle("Contact Station");
+        // set the custom layout
+        builder.setMessage("Do you want to call this station ?")
+        builder.setPositiveButton("Yes") { dialog, which ->
+            dialog?.dismiss()
+            callphone?.setBackgroundColor(Color.YELLOW)
+            Toast.makeText(this, "Calling...", Toast.LENGTH_LONG).show()
+            val i = Intent(Intent.ACTION_DIAL, null)
+            startActivity(i)
+        }
+        builder.setNegativeButton("Cancel") { dialog, which ->
+            dialog?.dismiss()
+        }
+
+        // create and show the alert dialog
+        alertDialog = builder.create();
+        alertDialog?.show();
+        alertDialog?.setCancelable(false);
     }
 
     override fun onStart() {
@@ -113,7 +155,95 @@ class NowPlayingActivity : AppCompatActivity() {
     override fun onStop() {
         super.onStop()
         EventBus.getDefault().unregister(this)
+
     }
 
+    override fun onClick(v: View?) {
+        when (v) {
+
+            camera -> {
+                requestCameraPermisison()
+            }
+
+            maps -> {
+                startMapAction()
+            }
+
+            callphone -> {
+                startPhoneAction()
+            }
+
+            world -> {
+               // Toast.makeText(this, "World", Toast.LENGTH_SHORT).show()
+            }
+
+            cart -> {
+                startPurchaseAction()
+            }
+
+            about -> {
+                showAboutDialog()
+            }
+
+            like -> {
+                startLikeAction()
+            }
+        }
+    }
+
+    private fun startLikeAction(){
+        Toast.makeText(this, "Added to favourites", Toast.LENGTH_SHORT).show()
+        like?.setBackgroundColor(Color.YELLOW)
+    }
+
+    private fun showAboutDialog(){
+        var builder = AlertDialog.Builder(this);
+        builder.setTitle("Interactive Radio");
+        // set the custom layout
+        builder.setMessage("Features of this application include:\n" +
+                "-Instant Polls\n" +
+                "-Pictures of what is being discussed\n" +
+                "-Details of interviewed personalities\n" +
+                "-Video of what is being discussed\n" +
+                "-Select question you want the DJ to ask the interviewee \n" +
+                "-Live Streaming from the studio\n" +
+                "-Chat using the phone app" +
+                "-Personalized ad details" +
+                "-Sponsors\n" +
+                "-Listener engagement questions\n" +
+                "-Real-time polls\n" +
+                "-Chat using the phone app\n" +
+                "-Artist Details\n" +
+                "-Song Details")
+        builder.setPositiveButton("Okay") { dialog, which ->
+            dialog?.dismiss()
+        }
+        // create and show the alert dialog
+        alertDialog = builder.create();
+        alertDialog?.show();
+        alertDialog?.setCancelable(true);
+    }
+
+    private fun requestCameraPermisison(){
+        ActivityCompat.requestPermissions(this,
+             Array<String>(1){ Manifest.permission.CAMERA}, 1)
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        when(requestCode){
+            1->{
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    val intent = Intent("android.media.action.IMAGE_CAPTURE");
+                    startActivity(intent)
+                } else {
+                    Toast.makeText(this, "Permission denied to open your camera ", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+    }
 
 }

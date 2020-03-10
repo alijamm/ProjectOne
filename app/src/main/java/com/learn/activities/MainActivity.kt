@@ -35,6 +35,7 @@ import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
 import java.util.*
+import kotlin.collections.ArrayList
 
 
 class MainActivity : AppCompatActivity() {
@@ -108,7 +109,7 @@ class MainActivity : AppCompatActivity() {
     }
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onMessageEvent(event: MessageEvent?) {
-        Toast.makeText(this,"${event?.message}",Toast.LENGTH_LONG).show()
+//        Toast.makeText(this,"${event?.message}",Toast.LENGTH_LONG).show()
 
         when(event?.message){
             "play"->{
@@ -176,29 +177,37 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun populateDummyData() {
+        val answers : ArrayList<String>? = arrayListOf()
+        answers?.add("• yes")
+        answers?.add("• no")
+        answers?.add("• completely confused")
         itemList.add(
             Radio(
                 "Mix FM Lebanon",
                 RadioType(RadioType.FILTER_MUSIC),
                 song = "California Dreamin",
-                songArtist = "SIA"
+                songArtist = "SIA", frequency = 99.4
             )
         )
-        itemList.add(Radio("Mix FM Lebanon", RadioType(RadioType.FILTER_MUSIC), frequency = 99.3))
-        itemList.add(Radio("Al-Nour", RadioType(RadioType.FILTER_AD), frequency = 109.3))
-        itemList.add(Radio("NRJ (Lebanon)", RadioType(RadioType.FILTER_AD), frequency = 89.3))
-        itemList.add(Radio("Radio Lebanon", RadioType(RadioType.FILTER_AD), frequency = 92.4))
-        itemList.add(Radio("Radio Maria", RadioType(RadioType.FILTER_TALK), frequency = 90.1))
+        itemList.add(Radio("Mix FM Lebanon", RadioType(RadioType.FILTER_MUSIC),song = "Malibu",
+            songArtist = "Miley Cyrus", frequency = 99.3))
+        itemList.add(Radio("Al-Nour", RadioType(RadioType.FILTER_AD),songArtist = "Audi",song = "A7 Sedan", frequency = 109.3))
+        itemList.add(Radio("NRJ (Lebanon)", RadioType(RadioType.FILTER_AD), songArtist = "Audi",song = "A7 Sedan",frequency = 89.3))
+        itemList.add(Radio("Radio Lebanon", RadioType(RadioType.FILTER_AD), songArtist = "Audi",song = "A7 Sedan",frequency = 92.4))
+        itemList.add(Radio("Radio Maria", RadioType(RadioType.FILTER_TALK), question = "What do you think of whats happening ?\nDo you support the yellow vests?",
+            answers = answers,frequency = 90.1))
         itemList.add(
             Radio(
                 "Radio One (Lebanon)",
                 RadioType(RadioType.FILTER_TALK),
-                frequency = 78.3
+                frequency = 78.3,question = "What do you think of whats happening ?\nDo you support the yellow vests?",
+                answers = answers
             )
         )
-        itemList.add(Radio("Mix FM Lebanon", RadioType(RadioType.FILTER_TALK), frequency = 99.0))
-        itemList.add(Radio("Radio Orient", RadioType(RadioType.FILTER_MUSIC), frequency = 100.0))
-        itemList.add(Radio("Voice of Lebanon", RadioType(RadioType.FILTER_AD), frequency = 89.9))
+        itemList.add(Radio("Mix FM Lebanon", RadioType(RadioType.FILTER_TALK),question = "What do you think of whats happening ?\nDo you support the yellow vests?",
+            answers = answers, frequency = 99.0))
+        itemList.add(Radio("Radio Orient", RadioType(RadioType.FILTER_MUSIC), song = "Monsters",songArtist = "Rihanna",frequency = 100.0))
+        itemList.add(Radio("Voice of Lebanon", RadioType(RadioType.FILTER_AD),songArtist = "Audi",song = "A7 Sedan", frequency = 89.9))
         brvahAdapter?.notifyDataSetChanged()
         recycler_view_main?.visibility = View.VISIBLE
     }

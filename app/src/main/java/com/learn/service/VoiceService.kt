@@ -1,27 +1,24 @@
 package com.learn.service
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
-import android.app.Service
+import android.R
+import android.app.*
 import android.content.Context
 import android.content.Intent
+import android.media.AudioAttributes
+import android.net.Uri
 import android.os.Build
 import android.os.Handler
 import android.os.IBinder
-import android.speech.tts.TextToSpeech
 import android.util.Log
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import com.google.gson.Gson
+import com.learn.BuildConfig
 import com.learn.activities.MainActivity
-import com.learn.constants.RECEIVE_JSON
+import com.learn.constants.NOTIFICATION_IDS
 import com.learn.models.MessageEvent
 import com.vikramezhil.droidspeech.DroidSpeech
 import com.vikramezhil.droidspeech.OnDSListener
 import org.greenrobot.eventbus.EventBus
-import java.util.*
 
 
 class VoiceService : Service(), OnDSListener {
@@ -70,7 +67,7 @@ class VoiceService : Service(), OnDSListener {
     }
 
     override fun onStart(intent: Intent, startid: Int) {
-        Toast.makeText(this, "Service started by user.", Toast.LENGTH_LONG).show()
+//        Toast.makeText(this, "Service started by user.", Toast.LENGTH_LONG).show()
     }
 
     private fun createPersistentNotificationPreO(intent: Intent) {
@@ -179,7 +176,7 @@ class VoiceService : Service(), OnDSListener {
     override fun onDroidSpeechFinalResult(finalSpeechResult: String?) {
         finalSpeechResult?.toLowerCase()
         if (finalSpeechResult?.indexOf("hey") != -1 || finalSpeechResult?.indexOf("hello") != -1|| finalSpeechResult?.indexOf("ecu") != -1) {
-            if (finalSpeechResult?.indexOf("q") != -1 || finalSpeechResult?.indexOf("queue") != -1 || finalSpeechResult?.indexOf("cute") != -1) {
+            if (finalSpeechResult?.indexOf("q") != -1 || finalSpeechResult?.indexOf("queue") != -1 || finalSpeechResult?.indexOf("cute") != -1||finalSpeechResult?.indexOf("ecu") != -1) {
                 val i = Intent()
                 i.setClass(this, MainActivity::class.java)
                 i.flags = Intent.FLAG_ACTIVITY_NEW_TASK
@@ -210,13 +207,22 @@ class VoiceService : Service(), OnDSListener {
             return
         }
 
+        if (finalSpeechResult?.indexOf("like") != -1 || finalSpeechResult?.indexOf("favourite") != -1) {
+            EventBus.getDefault().post( MessageEvent("like"));
+            return
+        }
+
+        if (finalSpeechResult?.indexOf("about") != -1 || finalSpeechResult?.indexOf("help") != -1) {
+            EventBus.getDefault().post( MessageEvent("about"));
+            return
+        }
+
         if(finalSpeechResult?.indexOf("yes")!=-1){
             EventBus.getDefault().post( MessageEvent("yes"));
             return
         }
 
     }
-
 
     override fun onDroidSpeechRmsChanged(rmsChangedValue: Float) {
     }
