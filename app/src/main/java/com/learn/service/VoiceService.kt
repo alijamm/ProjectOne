@@ -33,26 +33,28 @@ class VoiceService : Service(), OnDSListener {
 
     override fun onCreate() {
         super.onCreate()
+        Log.d("Q", "service created")
         droidSpeech = DroidSpeech(this, null)
         droidSpeech?.setOnDroidSpeechListener(this)
-        handler = Handler()
-        runnable = Runnable {
-            Log.d("Q", "service is running")
-            handler?.postDelayed(runnable, 20000)
-        }
-
-        handler?.post(runnable)
+//        handler = Handler()
+//        runnable = Runnable {
+//            Log.d("Q", "service is running")
+//            handler?.postDelayed(runnable, 20000)
+//        }
+//
+//        handler?.post(runnable)
         EventBus.getDefault().post( MessageEvent("alive"));
         droidSpeech?.startDroidSpeechRecognition()
     }
 
     override fun onBind(intent: Intent?): IBinder? {
-
+        Log.d("Q", "service bind")
 
         return null
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        Log.d("Q", "onstart command called")
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             intent?.let { createPersistentNotificationO(it) }
         } else {
@@ -62,16 +64,19 @@ class VoiceService : Service(), OnDSListener {
     }
     override fun onDestroy() {
         /* IF YOU WANT THIS SERVICE KILLED WITH THE APP THEN UNCOMMENT THE FOLLOWING LINE */
+        Log.d("Q", "destroyed service :(")
+
         handler?.removeCallbacks(runnable)
         droidSpeech?.closeDroidSpeechOperations()
     }
 
     override fun onStart(intent: Intent, startid: Int) {
 //        Toast.makeText(this, "Service started by user.", Toast.LENGTH_LONG).show()
+        Log.d("Q", "start ????")
     }
 
     private fun createPersistentNotificationPreO(intent: Intent) {
-        val contentTitle = "My Service"
+        val contentTitle = "Quu Service"
         val contentText = "You have a running service !"
 
         // Create Pending Intents.
@@ -108,7 +113,7 @@ class VoiceService : Service(), OnDSListener {
     }
 
     private fun createPersistentNotificationO(intent: Intent) {
-        val contentTitle = "My Service"
+        val contentTitle = "Quu Service"
 
         val contentText = "You have a running service !"
         // Action to stop the service.
@@ -125,7 +130,7 @@ class VoiceService : Service(), OnDSListener {
             0, notificationIntent, 0
         )
         val notification = NotificationCompat.Builder(this, "foreroundServiceChannel")
-            .setContentTitle("Foreground Service")
+            .setContentTitle("Quu Service")
             .setContentText(input)
             .setSmallIcon(android.R.drawable.arrow_up_float)
             .setContentIntent(pendingIntent)
@@ -174,6 +179,7 @@ class VoiceService : Service(), OnDSListener {
     }
 
     override fun onDroidSpeechFinalResult(finalSpeechResult: String?) {
+        Log.d("Q", "final speech $finalSpeechResult")
         finalSpeechResult?.toLowerCase()
         if (finalSpeechResult?.indexOf("hey") != -1 || finalSpeechResult?.indexOf("hello") != -1|| finalSpeechResult?.indexOf("ecu") != -1) {
             if (finalSpeechResult?.indexOf("q") != -1 || finalSpeechResult?.indexOf("queue") != -1 || finalSpeechResult?.indexOf("cute") != -1||finalSpeechResult?.indexOf("ecu") != -1) {
@@ -202,8 +208,16 @@ class VoiceService : Service(), OnDSListener {
             return
         }
 
-        if (finalSpeechResult?.indexOf("call") != -1 || finalSpeechResult?.indexOf("number") != -1) {
-            EventBus.getDefault().post( MessageEvent("call"));
+        if (finalSpeechResult?.indexOf("call") != -1) {
+            when {
+                finalSpeechResult?.indexOf("station") != -1 -> {
+                    EventBus.getDefault().post( MessageEvent("callstation"))
+                }
+                finalSpeechResult?.indexOf("advertiser") != -1 -> {
+                    EventBus.getDefault().post( MessageEvent("calladvertisor"))
+                }
+                else -> EventBus.getDefault().post( MessageEvent("callwho"))
+            }
             return
         }
 
@@ -217,13 +231,28 @@ class VoiceService : Service(), OnDSListener {
             return
         }
 
+        if (finalSpeechResult?.indexOf("lyrics") != -1) {
+            EventBus.getDefault().post( MessageEvent("lyrics"));
+            return
+        }
+
         if(finalSpeechResult?.indexOf("yes")!=-1){
             EventBus.getDefault().post( MessageEvent("yes"));
+            return
+        }
+
+        if(finalSpeechResult?.indexOf("no")!=-1){
+            EventBus.getDefault().post( MessageEvent("no"));
+            return
+        }
+        if(finalSpeechResult?.indexOf("not sure")!=-1 ||finalSpeechResult?.indexOf("confused")!=-1 ){
+            EventBus.getDefault().post( MessageEvent("not sure"));
             return
         }
 
     }
 
     override fun onDroidSpeechRmsChanged(rmsChangedValue: Float) {
+        Log.d("Q", "rms")
     }
 }

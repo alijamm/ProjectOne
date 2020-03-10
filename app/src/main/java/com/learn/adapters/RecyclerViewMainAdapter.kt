@@ -11,6 +11,8 @@ class RecyclerViewMainAdapter(layoutResId : Int, itemList : MutableList<Radio>) 
 
     override fun convert(helper: BaseViewHolder?, item: Radio?) {
         helper?.setText(R.id.title,item?.name)
+        item?.logo?.let { helper?.setImageResource(R.id.logo, it) }
+
     }
 
 

@@ -21,6 +21,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.chad.library.adapter.base.BaseQuickAdapter
 import com.chad.library.adapter.base.BaseViewHolder
 import com.google.gson.Gson
@@ -31,6 +32,7 @@ import com.learn.models.MessageEvent
 import com.learn.models.Radio
 import com.learn.service.VoiceService
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.recycler_view_main_list.*
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
@@ -48,6 +50,7 @@ class MainActivity : AppCompatActivity() {
     private var speaker: TextToSpeech? = null
     private var alertDialog: AlertDialog? = null
     private var local: LocalBroadcastManager? = null
+    private var openNowPlayingConfirmed : Boolean = false
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -56,30 +59,34 @@ class MainActivity : AppCompatActivity() {
         local = LocalBroadcastManager.getInstance(this)
         showProgressBarFor(LOADING_TIME)
         brvahAdapter = RecyclerViewMainAdapter(R.layout.recycler_view_main_list, itemList)
-        recycler_view_main?.layoutManager = GridLayoutManager(this, 2)
+        recycler_view_main?.layoutManager = LinearLayoutManager(this)
         recycler_view_main?.adapter = brvahAdapter
         brvahAdapter?.openLoadAnimation()
         brvahAdapter?.onItemClickListener =
             BaseQuickAdapter.OnItemClickListener() { baseQuickAdapter: BaseQuickAdapter<Any, BaseViewHolder>, view: View, i: Int ->
-                var builder = AlertDialog.Builder(this);
-                builder.setTitle("Turn on Radio");
-                // set the custom layout
-                builder.setMessage("Navigate to ${(baseQuickAdapter.data[i] as Radio).frequency}MHz for radio interaction with ${(baseQuickAdapter.data[i] as Radio).name}")
-                builder.setPositiveButton("Listen") { dialog, which ->
+                openNowPlayingConfirmed = true
 
+
+                var builder = AlertDialog.Builder(this);
+                builder.setTitle("Radio");
+                // set the custom layout
+                val inflater = this.layoutInflater
+                builder.setView(inflater.inflate(R.layout.listen_dialog, null))
+//                builder.setMessage("Listen to  ${(baseQuickAdapter.data[i] as Radio).name} ?")
+                builder.setNegativeButton("Cancel") { dialog, _ ->
                     dialog?.dismiss()
-                    openNowPlayingRadioActivity(baseQuickAdapter.data[i] as Radio)
-                }
-                builder.setNegativeButton("Cancel") { dialog, which ->
-                    dialog?.dismiss()
+                    openNowPlayingConfirmed = false
                 }
 
                 // create and show the alert dialog
                 alertDialog = builder.create();
                 alertDialog?.show();
                 alertDialog?.setCancelable(false);
-                Log.d("RADIO", "on item click ")
-
+                Handler().postDelayed(Runnable {
+                    alertDialog?.dismiss()
+                    if(openNowPlayingConfirmed)
+                        openNowPlayingRadioActivity(baseQuickAdapter.data[i] as Radio)
+                }, 2347L)
 
             }
 
@@ -107,16 +114,35 @@ class MainActivity : AppCompatActivity() {
                 stopMyService()
         }
     }
+
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onMessageEvent(event: MessageEvent?) {
 //        Toast.makeText(this,"${event?.message}",Toast.LENGTH_LONG).show()
 
         when(event?.message){
             "play"->{
-                openNowPlayingRadioActivity(itemList[(Math.random() * ( 5 )).toInt()])
+                openNowPlayingConfirmed = true
+                var builder = AlertDialog.Builder(this);
+                builder.setTitle("Radio");
+                // set the custom layout
+                val inflater = this.layoutInflater
+                builder.setView(inflater.inflate(R.layout.listen_dialog, null))
+                builder.setNegativeButton("Cancel") { dialog, _ ->
+                    dialog?.dismiss()
+                    openNowPlayingConfirmed = false
+                }
+
+                // create and show the alert dialog
+                alertDialog = builder.create();
+                alertDialog?.show();
+                alertDialog?.setCancelable(false);
+                Handler().postDelayed(Runnable {
+                    alertDialog?.dismiss()
+                    if(openNowPlayingConfirmed)
+                        openNowPlayingRadioActivity(itemList[(Math.random() * ( 5 )).toInt()])
+                }, 2347L)
                 textToSpeech("now playing on radio")
             }
-
         }
     }
     private fun textToSpeech(s : String){
@@ -183,31 +209,31 @@ class MainActivity : AppCompatActivity() {
         answers?.add("• completely confused")
         itemList.add(
             Radio(
-                "Mix FM Lebanon",
+                "680 The Heat",
                 RadioType(RadioType.FILTER_MUSIC),
                 song = "California Dreamin",
-                songArtist = "SIA", frequency = 99.4
+                songArtist = "SIA", frequency = 99.4,logo =  R.drawable.theheat
             )
         )
-        itemList.add(Radio("Mix FM Lebanon", RadioType(RadioType.FILTER_MUSIC),song = "Malibu",
-            songArtist = "Miley Cyrus", frequency = 99.3))
-        itemList.add(Radio("Al-Nour", RadioType(RadioType.FILTER_AD),songArtist = "Audi",song = "A7 Sedan", frequency = 109.3))
-        itemList.add(Radio("NRJ (Lebanon)", RadioType(RadioType.FILTER_AD), songArtist = "Audi",song = "A7 Sedan",frequency = 89.3))
-        itemList.add(Radio("Radio Lebanon", RadioType(RadioType.FILTER_AD), songArtist = "Audi",song = "A7 Sedan",frequency = 92.4))
-        itemList.add(Radio("Radio Maria", RadioType(RadioType.FILTER_TALK), question = "What do you think of whats happening ?\nDo you support the yellow vests?",
+        itemList.add(Radio("WWRC The Answer\n1260 AM", RadioType(RadioType.FILTER_MUSIC),song = "Malibu",
+            songArtist = "Miley Cyrus",logo = R.drawable.wwrc, frequency = 99.3))
+        itemList.add(Radio("WAVA 105.1", RadioType(RadioType.FILTER_AD),R.drawable.wava,songArtist = "Audi",song = "A7 Sedan", frequency = 109.3))
+        itemList.add(Radio("Voice of America", RadioType(RadioType.FILTER_AD), songArtist = "Audi",song = "A7 Sedan",logo = R.drawable.voa,frequency = 89.3))
+        itemList.add(Radio("WETA", RadioType(RadioType.FILTER_AD), songArtist = "Audi",song = "A7 Sedan",logo = R.drawable.weta,frequency = 92.4))
+        itemList.add(Radio("Beats 360", RadioType(RadioType.FILTER_TALK),logo = R.drawable.beats, question = "What do you think of whats happening ?\nDo you support the yellow vests?",
             answers = answers,frequency = 90.1))
         itemList.add(
             Radio(
-                "Radio One (Lebanon)",
-                RadioType(RadioType.FILTER_TALK),
+                "WHBC",
+                RadioType(RadioType.FILTER_TALK),logo = R.drawable.whbc,
                 frequency = 78.3,question = "What do you think of whats happening ?\nDo you support the yellow vests?",
                 answers = answers
             )
         )
-        itemList.add(Radio("Mix FM Lebanon", RadioType(RadioType.FILTER_TALK),question = "What do you think of whats happening ?\nDo you support the yellow vests?",
+        itemList.add(Radio("WFED Federal News Radio", RadioType(RadioType.FILTER_TALK),logo = R.drawable.fedr,question = "What do you think of whats happening ?\nDo you support the yellow vests?",
             answers = answers, frequency = 99.0))
-        itemList.add(Radio("Radio Orient", RadioType(RadioType.FILTER_MUSIC), song = "Monsters",songArtist = "Rihanna",frequency = 100.0))
-        itemList.add(Radio("Voice of Lebanon", RadioType(RadioType.FILTER_AD),songArtist = "Audi",song = "A7 Sedan", frequency = 89.9))
+        itemList.add(Radio("Retro 80's", RadioType(RadioType.FILTER_MUSIC),logo = R.drawable.retro, song = "Monsters",songArtist = "Rihanna",frequency = 100.0))
+        itemList.add(Radio("WPFW", RadioType(RadioType.FILTER_AD),songArtist = "Audi",logo = R.drawable.wpfw,song = "A7 Sedan", frequency = 89.9))
         brvahAdapter?.notifyDataSetChanged()
         recycler_view_main?.visibility = View.VISIBLE
     }

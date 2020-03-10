@@ -12,7 +12,6 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_margin="16dp"
-        android:tint="@android:color/white"
         app:layout_constraintBottom_toTopOf="@+id/guidelineHorizontal"
         app:layout_constraintEnd_toStartOf="@+id/songAdGuidline"
         app:layout_constraintStart_toStartOf="parent"
@@ -107,12 +106,12 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
-            android:id="@+id/camera"
+            android:id="@+id/station"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
             android:layout_weight="1"
             android:padding="6dp"
-            android:src="@drawable/ic_camera"
+            android:src="@drawable/ic_signal_white"
             />
 
         <ImageView
@@ -169,6 +168,15 @@
             android:padding="6dp"
             android:layout_weight="1"
             android:src="@drawable/ic_worldwide"
+            />
+
+        <ImageView
+            android:id="@+id/lyrics"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:padding="6dp"
+            android:layout_weight="1"
+            android:src="@drawable/ic_lyrics"
             />
 
 
