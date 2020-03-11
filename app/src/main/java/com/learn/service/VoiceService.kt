@@ -9,6 +9,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Handler
 import android.os.IBinder
+import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
@@ -182,10 +183,12 @@ class VoiceService : Service(), OnDSListener {
         Log.d("Q", "final speech $finalSpeechResult")
         finalSpeechResult?.toLowerCase()
         if (finalSpeechResult?.indexOf("hey") != -1 || finalSpeechResult?.indexOf("hello") != -1|| finalSpeechResult?.indexOf("ecu") != -1) {
-            if (finalSpeechResult?.indexOf("q") != -1 || finalSpeechResult?.indexOf("queue") != -1 || finalSpeechResult?.indexOf("cute") != -1||finalSpeechResult?.indexOf("ecu") != -1) {
+            if (finalSpeechResult?.indexOf("q") != -1 || finalSpeechResult?.indexOf("queue") != -1 || finalSpeechResult?.indexOf("you") != -1||finalSpeechResult?.indexOf("ecu") != -1) {
                 val i = Intent()
                 i.setClass(this, MainActivity::class.java)
                 i.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+//                i.flags = Intent.FLAG_FROM_BACKGROUND
+//                i.flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
                 startActivity(i)
                 return
             }
@@ -213,11 +216,21 @@ class VoiceService : Service(), OnDSListener {
                 finalSpeechResult?.indexOf("station") != -1 -> {
                     EventBus.getDefault().post( MessageEvent("callstation"))
                 }
-                finalSpeechResult?.indexOf("advertiser") != -1 -> {
-                    EventBus.getDefault().post( MessageEvent("calladvertisor"))
+                finalSpeechResult?.indexOf("advertisement") != -1 -> {
+                    EventBus.getDefault().post( MessageEvent("calladvertisement"))
                 }
                 else -> EventBus.getDefault().post( MessageEvent("callwho"))
             }
+            return
+        }
+
+        if (finalSpeechResult?.indexOf("station") != -1) {
+            EventBus.getDefault().post( MessageEvent("station"))
+            return
+        }
+
+        if (finalSpeechResult?.indexOf("advertisement") != -1) {
+            EventBus.getDefault().post( MessageEvent("advertisement"))
             return
         }
 
@@ -253,6 +266,5 @@ class VoiceService : Service(), OnDSListener {
     }
 
     override fun onDroidSpeechRmsChanged(rmsChangedValue: Float) {
-        Log.d("Q", "rms")
     }
 }

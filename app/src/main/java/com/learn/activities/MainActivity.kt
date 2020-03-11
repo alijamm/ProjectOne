@@ -47,16 +47,17 @@ class MainActivity : AppCompatActivity() {
     private val itemList: MutableList<Radio> = mutableListOf()
     private var brvahAdapter: RecyclerViewMainAdapter? = null
     private val LOADING_TIME: Long = 3000
-    private var speaker: TextToSpeech? = null
+//    private var speaker: TextToSpeech? = null
     private var alertDialog: AlertDialog? = null
-    private var local: LocalBroadcastManager? = null
     private var openNowPlayingConfirmed : Boolean = false
+    companion object{
+        var counter : Int = 0
+    }
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        local = LocalBroadcastManager.getInstance(this)
         showProgressBarFor(LOADING_TIME)
         brvahAdapter = RecyclerViewMainAdapter(R.layout.recycler_view_main_list, itemList)
         recycler_view_main?.layoutManager = LinearLayoutManager(this)
@@ -92,26 +93,36 @@ class MainActivity : AppCompatActivity() {
 
         val prefs = getSharedPreferences("switch", Context.MODE_PRIVATE)
         flag = prefs.getBoolean("name", false)
-        speaker = TextToSpeech(this,
-            OnInitListener { status ->
-                if (status != TextToSpeech.ERROR) {
-                    speaker?.language = Locale.US
-                }
-            })
+//        speaker = TextToSpeech(this,
+//            OnInitListener { status ->
+//                if (status != TextToSpeech.ERROR) {
+//                    speaker?.language = Locale.US
+//                }
+//            })
 
         switch_button?.isChecked = flag
 
         switch_button?.setOnCheckedChangeListener { button, isChecked ->
+            checkforAlertWindowPermission()
             val editor = prefs.edit()
             editor.putBoolean("name", isChecked)
             editor.apply()
 
             if (isChecked) {
-                textToSpeech("q ready")
+//                textToSpeech("q ready")
                 startMyService()
 
             } else
                 stopMyService()
+        }
+    }
+
+    private fun checkforAlertWindowPermission() {
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.SYSTEM_ALERT_WINDOW) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                Array<String>(9){Manifest.permission.SYSTEM_ALERT_WINDOW},
+                8);
         }
     }
 
@@ -121,6 +132,8 @@ class MainActivity : AppCompatActivity() {
 
         when(event?.message){
             "play"->{
+                if (counter > 8)
+                    counter = 0
                 openNowPlayingConfirmed = true
                 var builder = AlertDialog.Builder(this);
                 builder.setTitle("Radio");
@@ -138,19 +151,21 @@ class MainActivity : AppCompatActivity() {
                 alertDialog?.setCancelable(false);
                 Handler().postDelayed(Runnable {
                     alertDialog?.dismiss()
-                    if(openNowPlayingConfirmed)
-                        openNowPlayingRadioActivity(itemList[(Math.random() * ( 5 )).toInt()])
+                    if(openNowPlayingConfirmed) {
+                        openNowPlayingRadioActivity(itemList[counter])
+                        counter++
+                    }
                 }, 2347L)
                 textToSpeech("now playing on radio")
             }
         }
     }
     private fun textToSpeech(s : String){
-        if (Build.VERSION.SDK_INT >= 21) {
-            speaker?.speak(s, TextToSpeech.QUEUE_ADD, null, null)
-        } else {
-            speaker?.speak(s, TextToSpeech.QUEUE_ADD, null)
-        }
+//        if (Build.VERSION.SDK_INT >= 21) {
+//            speaker?.speak(s, TextToSpeech.QUEUE_ADD, null, null)
+//        } else {
+////            speaker?.speak(s, TextToSpeech.QUEUE_ADD, null)
+//        }
     }
 
 
@@ -172,10 +187,10 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        if (speaker != null) {
-            speaker?.stop()
-            speaker?.shutdown()
-        }
+//        if (speaker != null) {
+//            speaker?.stop()
+//            speaker?.shutdown()
+//        }
     }
 
     override fun onStop() {
@@ -207,21 +222,25 @@ class MainActivity : AppCompatActivity() {
         answers?.add("• yes")
         answers?.add("• no")
         answers?.add("• completely confused")
+        itemList.add(Radio("WAVA 105.1", RadioType(RadioType.FILTER_AD),R.drawable.wava,songArtist = "Audi",song = "A7 Sedan", frequency = 109.3))
         itemList.add(
             Radio(
                 "680 The Heat",
                 RadioType(RadioType.FILTER_MUSIC),
                 song = "California Dreamin",
-                songArtist = "SIA", frequency = 99.4,logo =  R.drawable.theheat
+                songArtist = "SIA", frequency = 99.4,logo =  R.drawable.theheat,lyrics = "https://www.azlyrics.com/lyrics/mamasandthepapas/californiadreamin.html"
             )
         )
-        itemList.add(Radio("WWRC The Answer\n1260 AM", RadioType(RadioType.FILTER_MUSIC),song = "Malibu",
-            songArtist = "Miley Cyrus",logo = R.drawable.wwrc, frequency = 99.3))
-        itemList.add(Radio("WAVA 105.1", RadioType(RadioType.FILTER_AD),R.drawable.wava,songArtist = "Audi",song = "A7 Sedan", frequency = 109.3))
+        itemList.add(Radio("WFED Federal News Radio", RadioType(RadioType.FILTER_TALK),logo = R.drawable.fedr,question = "What do you think of whats happening ?\nDo you support the yellow vests?",
+            answers = answers, frequency = 99.0))
         itemList.add(Radio("Voice of America", RadioType(RadioType.FILTER_AD), songArtist = "Audi",song = "A7 Sedan",logo = R.drawable.voa,frequency = 89.3))
-        itemList.add(Radio("WETA", RadioType(RadioType.FILTER_AD), songArtist = "Audi",song = "A7 Sedan",logo = R.drawable.weta,frequency = 92.4))
+        itemList.add(Radio("WWRC The Answer\n1260 AM", RadioType(RadioType.FILTER_MUSIC),song = "Malibu", lyrics = "https://genius.com/Miley-cyrus-malibu-lyrics",
+            songArtist = "Miley Cyrus",logo = R.drawable.wwrc, frequency = 99.3))
+
         itemList.add(Radio("Beats 360", RadioType(RadioType.FILTER_TALK),logo = R.drawable.beats, question = "What do you think of whats happening ?\nDo you support the yellow vests?",
             answers = answers,frequency = 90.1))
+        itemList.add(Radio("WETA", RadioType(RadioType.FILTER_AD), songArtist = "Audi",song = "A7 Sedan",logo = R.drawable.weta,frequency = 92.4))
+        itemList.add(Radio("Retro 80's", RadioType(RadioType.FILTER_MUSIC),logo = R.drawable.retro, song = "Monsters",songArtist = "Rihanna",lyrics = "https://genius.com/Eminem-the-monster-lyrics",frequency = 100.0))
         itemList.add(
             Radio(
                 "WHBC",
@@ -230,9 +249,6 @@ class MainActivity : AppCompatActivity() {
                 answers = answers
             )
         )
-        itemList.add(Radio("WFED Federal News Radio", RadioType(RadioType.FILTER_TALK),logo = R.drawable.fedr,question = "What do you think of whats happening ?\nDo you support the yellow vests?",
-            answers = answers, frequency = 99.0))
-        itemList.add(Radio("Retro 80's", RadioType(RadioType.FILTER_MUSIC),logo = R.drawable.retro, song = "Monsters",songArtist = "Rihanna",frequency = 100.0))
         itemList.add(Radio("WPFW", RadioType(RadioType.FILTER_AD),songArtist = "Audi",logo = R.drawable.wpfw,song = "A7 Sedan", frequency = 89.9))
         brvahAdapter?.notifyDataSetChanged()
         recycler_view_main?.visibility = View.VISIBLE
@@ -252,6 +268,31 @@ class MainActivity : AppCompatActivity() {
     private fun stopMyService() {
         val i = Intent(this, VoiceService::class.java)
         this.stopService(i)
+    }
+
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        when(requestCode){
+
+            9->{
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                } else {
+                    Toast.makeText(
+                        this,
+                        "Quu will not be able to listen to voice commands ",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+            8->{
+
+            }
+        }
     }
 
 }

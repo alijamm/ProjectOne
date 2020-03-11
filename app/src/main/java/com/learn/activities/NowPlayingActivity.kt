@@ -1,6 +1,7 @@
 package com.learn.activities
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
@@ -8,6 +9,9 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.View
+import android.webkit.WebChromeClient
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -19,6 +23,7 @@ import com.learn.constants.RadioType
 import com.learn.models.MessageEvent
 import com.learn.models.Radio
 import kotlinx.android.synthetic.main.activity_now_playing.*
+import kotlinx.android.synthetic.main.lyrics_dialog.*
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
@@ -48,6 +53,17 @@ class NowPlayingActivity : AppCompatActivity(), View.OnClickListener {
         when (radio?.type?.type) {
             RadioType.FILTER_MUSIC -> {
                 radioType = "music"
+                when (radio?.song) {
+                    "Malibu" -> {
+                        adImage?.setImageResource(R.drawable.malibu)
+                    }
+                    "Monsters" -> {
+                        adImage?.setImageResource(R.drawable.rihanna)
+                    }
+                    "California Dreamin" -> {
+                        adImage?.setImageResource(R.drawable.fornia)
+                    }
+                }
                 imageView2?.setImageDrawable(getDrawable(R.drawable.ic_signal_white))
                 talkPoll?.visibility = View.GONE
                 adImage?.visibility = View.VISIBLE
@@ -107,32 +123,74 @@ class NowPlayingActivity : AppCompatActivity(), View.OnClickListener {
             }
 
             "yes" -> {
-                if (alertDialog != null) {
-                    Toast.makeText(this, "Calling...", Toast.LENGTH_LONG).show()
-                    val i = Intent(Intent.ACTION_DIAL, null)
-                    alertDialog?.dismiss()
-                    alertDialog = null
-                    startActivity(i)
-                } else {
-                    answerQuestion("yes")
-                }
+//                if (alertDialog != null) {
+//                    val i = Intent(Intent.ACTION_DIAL, null)
+//                    alertDialog?.dismiss()
+//                    alertDialog = null
+//                    startActivity(i)
+//                } else {
+                answerQuestion("yes")
+//                }
             }
 
             "no" -> {
-                if (alertDialog != null) {
-                    alertDialog?.dismiss()
-                    alertDialog = null
-                } else {
-                    answerQuestion("no")
-                }
+//                if (alertDialog != null) {
+//                    alertDialog?.dismiss()
+//                    alertDialog = null
+                //} else {
+                answerQuestion("no")
+                //}
             }
 
             "callstation" -> {
-                startPhoneAction(false)
+
+                if (alertDialog != null) {
+                    alertDialog?.dismiss()
+                    alertDialog = null
+                    Toast.makeText(this, "Calling Station...", Toast.LENGTH_LONG).show()
+                    startPhoneAction(false)
+                } else {
+                    Toast.makeText(this, "Calling Station...", Toast.LENGTH_LONG).show()
+                    startPhoneAction(false)
+                }
+            }
+            "calladvertisement" -> {
+
+                if (alertDialog != null) {
+                    alertDialog?.dismiss()
+                    alertDialog = null
+                    Toast.makeText(this, "Calling advertisement...", Toast.LENGTH_LONG).show()
+                    startPhoneAction(false)
+                } else {
+                    Toast.makeText(this, "Calling advertisement...", Toast.LENGTH_LONG).show()
+                    startPhoneAction(false)
+                }
 
             }
-            "calladvertisor" -> {
-                startPhoneAction(false)
+
+            "station" -> {
+                if (alertDialog != null) {
+                    alertDialog?.dismiss()
+                    alertDialog = null
+                    Toast.makeText(this, "Calling Station...", Toast.LENGTH_LONG).show()
+                    startPhoneAction(false)
+                }else{
+                    Toast.makeText(this, "Calling Station...", Toast.LENGTH_LONG).show()
+
+                    startPhoneAction(false)
+                }
+
+            }
+
+            "advertisement" -> {
+                if (alertDialog != null) {
+                    alertDialog?.dismiss()
+                    alertDialog = null
+                    Toast.makeText(this, "Calling advertisement...", Toast.LENGTH_LONG).show()
+                    startPhoneAction(false)
+                }else{
+                    Toast.makeText(this, "Calling advertisement...", Toast.LENGTH_LONG).show()
+                    startPhoneAction(false)}
 
             }
 
@@ -147,20 +205,19 @@ class NowPlayingActivity : AppCompatActivity(), View.OnClickListener {
                 showAboutDialog()
             }
             "not sure" -> {
-                if (alertDialog != null) {
-                    callphone?.setBackgroundColor(Color.YELLOW)
-                    Toast.makeText(this, "Calling...", Toast.LENGTH_LONG).show()
-                    val i = Intent(Intent.ACTION_DIAL, null)
-                    alertDialog?.dismiss()
-                    alertDialog = null
-                    startActivity(i)
-                } else {
-                    answerQuestion("not sure")
-                }
+//                if (alertDialog != null) {
+//                    Toast.makeText(this, "Calling...", Toast.LENGTH_LONG).show()
+//                    val i = Intent(Intent.ACTION_DIAL, null)
+//                    alertDialog?.dismiss()
+//                    alertDialog = null
+//                    startActivity(i)
+//                } else {
+                answerQuestion("not sure")
+//                }
             }
 
             "lyrics" -> {
-                    showLyricsAction()
+                showLyricsAction()
             }
         }
     }
@@ -228,26 +285,26 @@ class NowPlayingActivity : AppCompatActivity(), View.OnClickListener {
             builder.setTitle("Call");
             // set the custom layout
             builder.setMessage("Who do you want to call ?")
-            builder.setPositiveButton("Call Station") { dialog, which ->
+            builder.setPositiveButton("Station") { dialog, which ->
                 dialog?.dismiss()
                 station?.setImageResource(R.drawable.ic_signaly)
                 alertDialog = null
-                Toast.makeText(this, "Calling...", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Calling Station...", Toast.LENGTH_LONG).show()
                 startActivity(i)
             }
-            builder.setNegativeButton("Call Advertisor") { dialog, which ->
+            builder.setNegativeButton("advertisement") { dialog, which ->
                 dialog?.dismiss()
                 callphone?.setImageResource(R.drawable.ic_smartphoney)
                 alertDialog = null
-                Toast.makeText(this, "Calling...", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Calling advertisement...", Toast.LENGTH_LONG).show()
                 startActivity(i)
             }
             // create and show the alert dialog
             alertDialog = builder.create();
             alertDialog?.show();
-            alertDialog?.setCancelable(false);
+            alertDialog?.setCancelable(true);
         } else {
-            Toast.makeText(this, "Calling...", Toast.LENGTH_LONG).show()
+            alertDialog = null
             startActivity(i)
         }
 
@@ -301,9 +358,25 @@ class NowPlayingActivity : AppCompatActivity(), View.OnClickListener {
         }
     }
 
+    @SuppressLint("SetJavaScriptEnabled")
     private fun showLyricsAction() {
         if (lyrics?.visibility == View.VISIBLE) {
-            Toast.makeText(this, "Showing Lyrics ...  ", Toast.LENGTH_LONG).show()
+            var builder = AlertDialog.Builder(this);
+            builder.setTitle("${radio?.song} lyrics");
+
+            val wv =  WebView(this)
+            wv.settings?.javaScriptEnabled = true
+            wv.settings?.javaScriptCanOpenWindowsAutomatically = true
+            wv.settings?.domStorageEnabled = true
+            wv.loadUrl(radio?.lyrics)
+            builder.setView(wv)
+            builder.setPositiveButton("Dismiss") { dialog, which ->
+                dialog?.dismiss()
+                alertDialog = null
+            }
+            alertDialog = builder.create();
+            alertDialog?.show();
+            alertDialog?.setCancelable(false);
             lyrics?.setImageResource(R.drawable.ic_lyricsy)
         }
     }
